@@ -1,19 +1,21 @@
 let defaultSetting = {
   mode: 'light',
-  tag: true,
+  tag: false,
   menuCollapse: false,
-  menuWidth: 230,
-  layout: 'classic',
-  skin: 'mine',
-  i18n: false,
+  menuWidth: 180,
+  layout: 'columns',
+  skin: 'businessGray',
+  i18n: true,
   language: 'zh_CN',
   animation: 'ma-slide-down',
-  color: '#165dff',
+  color: '#43A047',
   settingOpen: false,
   searchOpen: false,
   ws: true,
   registerWangEditorButtonFlag: false
 }
+
+
 
 import { defineStore } from 'pinia'
 import tool from '@/utils/tool'

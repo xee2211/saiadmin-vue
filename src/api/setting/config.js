@@ -1,17 +1,16 @@
-import { request } from '@/utils/request.js'
+import { request } from "@/utils/request.js";
 
 export default {
-
   /**
    * 获取配置列表
    * @returns
    */
   getConfigList(params) {
     return request({
-      url: '/core/config/index',
-      method: 'get',
-      params
-    })
+      url: "/core/config/index",
+      method: "get",
+      params,
+    });
   },
 
   /**
@@ -20,10 +19,10 @@ export default {
    */
   clearCache(data = {}) {
     return request({
-      url: '/core/config/clearCache',
-      method: 'post',
-      data
-    })
+      url: "/core/config/clearCache",
+      method: "post",
+      data,
+    });
   },
 
   /**
@@ -32,10 +31,10 @@ export default {
    */
   delete(data) {
     return request({
-      url: '/core/config/destroy',
-      method: 'delete',
-      data
-    })
+      url: "/core/config/destroy",
+      method: "delete",
+      data,
+    });
   },
 
   /**
@@ -44,10 +43,10 @@ export default {
    */
   save(data = {}) {
     return request({
-      url: '/core/config/save',
-      method: 'post',
-      data
-    })
+      url: "/core/config/save",
+      method: "post",
+      data,
+    });
   },
 
   /**
@@ -56,22 +55,22 @@ export default {
    */
   update(id, data = {}) {
     return request({
-      url: '/core/config/update/' + id,
-      method: 'put',
-      data
-    })
+      url: "/core/config/update/" + id,
+      method: "put",
+      data,
+    });
   },
 
   /**
    * 按 keys 更新配置
-   * @returns 
+   * @returns
    */
   updateByKeys(data) {
     return request({
-      url: '/core/config/updateByKeys',
-      method: 'post',
-      data
-    })
+      url: "/core/config/updateByKeys",
+      method: "post",
+      data,
+    });
   },
 
   /**
@@ -80,10 +79,10 @@ export default {
    */
   getConfigGroupList(params = {}) {
     return request({
-      url: '/core/configGroup/index',
-      method: 'get',
-      params
-    })
+      url: "/core/configGroup/index",
+      method: "get",
+      params,
+    });
   },
 
   /**
@@ -92,10 +91,10 @@ export default {
    */
   saveConfigGroup(data = {}) {
     return request({
-      url: '/core/configGroup/save',
-      method: 'post',
-      data
-    })
+      url: "/core/configGroup/save",
+      method: "post",
+      data,
+    });
   },
 
   /**
@@ -104,21 +103,21 @@ export default {
    */
   updateConfigGroup(data = {}) {
     return request({
-      url: '/core/configGroup/update',
-      method: 'post',
-      data
-    })
+      url: "/core/configGroup/update",
+      method: "post",
+      data,
+    });
   },
 
   /**
    * 删除配置组
    * @returns
    */
-   deleteConfigGroup(data = {}) {
+  deleteConfigGroup(data = {}) {
     return request({
-      url: '/core/configGroup/destroy',
-      method: 'delete',
-      data
-    })
+      url: "/core/configGroup/destroy",
+      method: "delete",
+      data,
+    });
   },
-}
+};
