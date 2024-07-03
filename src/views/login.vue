@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive, ref,onMounted } from 'vue'
 import loginApi from '@/api/login'
 import { useUserStore } from '@/store'
 import { useRouter, useRoute } from 'vue-router'
@@ -10,7 +10,12 @@ const captcha = ref(null)
 
 const loading = ref(false)
 
-const base_value = ref(null)
+
+const base_value = reactive({
+    verificationCode: "false"
+})
+
+
 
 let isDevelop = import.meta.env.VITE_APP_ENV === 'development'
 
@@ -29,14 +34,10 @@ const refreshCaptcha = () => {
 	})
 }
 
-
 const base_config = () => {
 	loginApi.getBaseConfig().then((res) => {
 		if (res.code === 200) {
-			 let base_config=[]
-			 res.data.map((item) => {
-			 base_value[item.key]=item.value
-		})
+			Object.assign(base_value, res.data);
 		}
 	})
 }
@@ -44,7 +45,7 @@ const base_config = () => {
 
 refreshCaptcha()
 base_config()
-console.log(base_value);
+
 
 const userStore = useUserStore()
 
@@ -96,7 +97,7 @@ const handleSubmit = async ({ values, errors }) => {
 						</a-input-password>
 					</a-form-item>
 
-					<a-form-item v-if="captcha_type == 'true'"
+					<a-form-item v-if="base_value.verificationCode == 'true'"
 						field="code"
 						:hide-label="true"
 						:rules="[
