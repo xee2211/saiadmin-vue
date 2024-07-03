@@ -10,6 +10,8 @@ const captcha = ref(null)
 
 const loading = ref(false)
 
+const base_value = ref(null)
+
 let isDevelop = import.meta.env.VITE_APP_ENV === 'development'
 
 var odata = isDevelop ? { username: 'admin', password: '123456', code: '' } : { username: '', password: '', code: '' }
@@ -27,7 +29,22 @@ const refreshCaptcha = () => {
 	})
 }
 
+
+const base_config = () => {
+	loginApi.getBaseConfig().then((res) => {
+		if (res.code === 200) {
+			 let base_config=[]
+			 res.data.map((item) => {
+			 base_value[item.key]=item.value
+		})
+		}
+	})
+}
+
+
 refreshCaptcha()
+base_config()
+console.log(base_value);
 
 const userStore = useUserStore()
 
@@ -79,7 +96,7 @@ const handleSubmit = async ({ values, errors }) => {
 						</a-input-password>
 					</a-form-item>
 
-					<a-form-item
+					<a-form-item v-if="captcha_type == 'true'"
 						field="code"
 						:hide-label="true"
 						:rules="[

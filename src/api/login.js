@@ -13,6 +13,19 @@ export default {
 		})
 	},
 
+		/**
+	 * 获取基本信息
+	 * @returns
+	 */
+		getBaseConfig() {
+			// return import.meta.env.VITE_APP_PROXY_PREFIX + '/core/captcha?' + Date.parse(new Date().toString())
+			return request({
+				url: '/core/base_config',
+				method: 'get',
+			})
+		},
+
+
 	/**
 	 * 用户登录
 	 * @param {object} params
