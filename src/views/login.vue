@@ -32,16 +32,6 @@ const refreshCaptcha = () => {
   })
 }
 
-const base_config2 = () => {
-  loginApi.getBaseConfig().then((res) => {
-    if (res.code === 200) {
-      Object.assign(base_value, res.data)
-    }
-  })
-}
-
-refreshCaptcha()
-
 const userStore = useUserStore()
 
 const redirect = route.query.redirect ? route.query.redirect : '/'
@@ -80,6 +70,10 @@ const base_config = async () => {
 }
 
 base_config()
+
+if (base_value.verificationCode) {
+  refreshCaptcha()
+}
 </script>
 <template>
   <div id="background" class="fixed"></div>

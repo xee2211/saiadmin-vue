@@ -117,7 +117,8 @@ const useUserStore = defineStore('user', {
     async setApp() {
       const appStore = useAppStore()
       const setting =
-        typeof this.user.backend_setting === 'string'
+        typeof this.user.backend_setting === 'string' &&
+        this.user.backend_setting !== ''
           ? JSON.parse(this.user.backend_setting)
           : this.user.backend_setting
       appStore.toggleMode(setting?.mode ?? appStore.mode)
