@@ -1,14 +1,13 @@
-
 import { defineStore } from 'pinia'
 
 let defaultConfig = {
-  site_name: 'SaiAdmin',
+  site_name: 'SaiAdmin2',
   site_keywords: '',
   site_desc: '',
   site_record_number: '',
   site_copyright: '',
   site_storage_mode: '',
-  web_close: '',
+  web_close: ''
 }
 
 const useConfigStore = defineStore('config', {
@@ -17,14 +16,14 @@ const useConfigStore = defineStore('config', {
   getters: {
     appCurrentConfig() {
       return { ...this.$state }
-    },
+    }
   },
 
   actions: {
     updateSettings(partial) {
-      this.$patch(partial);
-    },
-  },
+      this.$patch(partial)
+    }
+  }
 })
 
 export default useConfigStore

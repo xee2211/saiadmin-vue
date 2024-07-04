@@ -28,13 +28,14 @@ import packageJson from '../package.json'
 
 const app = createApp(App)
 
-app.use(ArcoVue, {})
-.use(ArcoVueIcon)
-.use(router)
-.use(store)
-.use(i18n)
-.use(directives)
-.use(globalComponents)
+app
+  .use(ArcoVue, {})
+  .use(ArcoVueIcon)
+  .use(router)
+  .use(store)
+  .use(i18n)
+  .use(directives)
+  .use(globalComponents)
 
 // 注册ma-icon图标
 const modules = import.meta.glob('./assets/ma-icons/*.vue', { eager: true })
@@ -46,10 +47,10 @@ for (const path in modules) {
 
 app.config.globalProperties.$tool = tool
 app.config.globalProperties.$common = common
-app.config.globalProperties.$title = import.meta.env.VITE_APP_TITLE
+app.config.globalProperties.$title =
+  tool.local.get('baseConfig')?.site_name ?? 'xee 后台'
 app.config.globalProperties.$url = import.meta.env.VITE_APP_BASE
 
 app.mount('#app')
 
-tool.capsule('SaiAdmin', `v${packageJson.version} release`)
-console.log('SaiAdmin 官网  https://saithink.top')
+tool.capsule('SaiAdmin2', `v${packageJson.version} release`)
