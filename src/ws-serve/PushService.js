@@ -4,9 +4,7 @@ import { Notification } from '@arco-design/web-vue'
 class PushService {
   ws
   timer = null
-
   interval = 1500
-
   user_channel = null
   state = null
 
@@ -17,15 +15,15 @@ class PushService {
       wsPort: '3131',
       encrypted: false,
       disableStats: true,
-      forceTLS: true,
-      enabledTransports: ['ws']
+      forceTLS: false,
+      enabledTransports: ['ws', 'wss']
     })
 
     this.ws.connection.bind('state_change', (context) => {
       if (context.current !== 'connected') {
         Notification.info({
           title: '通知',
-          content: 'ws链接关闭',
+          content: 'ws链接关闭' + context.current,
           duration: 0,
           closable: true
         })

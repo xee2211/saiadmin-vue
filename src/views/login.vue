@@ -3,36 +3,6 @@ import { reactive, ref, onMounted } from 'vue'
 import loginApi from '@/api/login'
 import { useUserStore } from '@/store'
 import { useRouter, useRoute } from 'vue-router'
-import { Push } from '@/utils/push-vue'
-
-onMounted(() => {
-  console.log('组件已经挂载')
-
-  //实例化webman-push
-
-  // 建立连接
-  var connection = new Push({
-    url: 'ws://127.0.0.1:3131', // websocket地址
-    app_key: '2d4271d4d40e6f3571e8aa7ef79ebbcf',
-    auth: '/plugin/webman/push/auth' // 订阅鉴权(仅限于私有频道)
-  })
-
-  // 假设用户uid为1
-  var uid = 1
-  // 浏览器监听user-1频道的消息，也就是用户uid为1的用户消息
-  var user_channel = connection.subscribe('user-' + uid)
-
-  // 当user-1频道有message事件的消息时
-  user_channel.on('message', function (data) {
-    // data里是消息内容
-    console.log(data)
-  })
-  // 当user-1频道有friendApply事件时消息时
-  user_channel.on('friendApply', function (data) {
-    // data里是好友申请相关信息
-    console.log(data)
-  })
-})
 
 const router = useRouter()
 const route = useRoute()
@@ -41,7 +11,7 @@ const aaa = ref(false)
 const loading = ref(false)
 
 const base_value = reactive({
-  verificationCode: 'false'
+  verificationCode: false
 })
 
 let isDevelop = import.meta.env.VITE_APP_ENV === 'development'
@@ -153,7 +123,7 @@ const handleSubmit = async ({ values, errors }) => {
           </a-form-item>
 
           <a-form-item
-            v-if="base_value.verificationCode == 'true'"
+            v-if="base_value.verificationCode"
             field="code"
             :hide-label="true"
             :rules="[
