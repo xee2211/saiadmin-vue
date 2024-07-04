@@ -6,7 +6,7 @@ class Message {
 
   timer = null
 
-  interval = 1500
+  interval = 60 * 1000
 
   constructor() {
     this.ws = new Wsocket(
