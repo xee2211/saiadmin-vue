@@ -15,13 +15,11 @@ let defaultSetting = {
   registerWangEditorButtonFlag: false
 }
 
-
-
 import { defineStore } from 'pinia'
 import tool from '@/utils/tool'
 import { generate, getRgbStr } from '@arco-design/color'
 
-if (! tool.local.get('setting')) {
+if (!tool.local.get('setting')) {
   tool.local.set('setting', defaultSetting)
 } else {
   defaultSetting = tool.local.get('setting')
@@ -36,12 +34,12 @@ const useAppStore = defineStore('app', {
   getters: {
     appCurrentSetting() {
       return { ...this.$state }
-    },
+    }
   },
 
   actions: {
     updateSettings(partial) {
-      this.$patch(partial);
+      this.$patch(partial)
     },
 
     toggleMode(dark) {
@@ -99,7 +97,10 @@ const useAppStore = defineStore('app', {
     changeColor(color) {
       if (!/^#[0-9A-Za-z]{6}/.test(color)) return
       this.color = color
-      const list = generate(this.color, { list: true, dark: this.mode === 'dark' })
+      const list = generate(this.color, {
+        list: true,
+        dark: this.mode === 'dark'
+      })
       list.forEach((color, index) => {
         const rgbStr = getRgbStr(color)
         document.body.style.setProperty(`--primary-${index + 1}`, rgbStr)
@@ -125,7 +126,7 @@ const useAppStore = defineStore('app', {
     setRegisterWangEditorButtonFlag(value) {
       this.registerWangEditorButtonFlag = value
     }
-  },
+  }
 })
 
 export default useAppStore

@@ -1,4 +1,5 @@
 import Pusher from 'pusher-js'
+import tool from '@/utils/tool'
 
 import { Notification } from '@arco-design/web-vue'
 class PushService {
@@ -9,13 +10,15 @@ class PushService {
   state = null
 
   constructor() {
+    let config = tool.local.get('baseConfig')
+
     this.ws = new Pusher('2d4271d4d40e6f3571e8aa7ef79ebbcf', {
       cluster: 'mt1',
-      wsHost: '127.0.0.1', // websocket地址
-      wsPort: '3131',
+      wsHost: config.wsHost, // websocket地址
+      wsPort: config.wsPort,
       encrypted: false,
       disableStats: true,
-      forceTLS: false,
+      forceTLS: config.ws_forceTLS,
       enabledTransports: ['ws', 'wss']
     })
 
@@ -32,18 +35,17 @@ class PushService {
         this.state = context.current
         this.ws.disconnect()
       }
-      console.log('STATE_CHANGE -> ', context) // this keeps changing from connecting to connected, and so on.
+      //console.log('STATE_CHANGE -> ', context) // this keeps changing from connecting to connected, and so on.
     })
 
     this.user_channel = this.ws.subscribe('user-1')
     console.log('ws连接成功')
   }
 
-  //connecting
-  //connecting
-
   on(channel, callback) {
+    //console.log(this.user_channel)
     this.user_channel.bind('message', (data) => {
+      //console.log(data)
       callback(data)
     })
   }

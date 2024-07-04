@@ -171,7 +171,7 @@ if (appStore.ws) {
 
   Wsm2.on('message', function (data) {
     // data里是消息内容
-    info('消息来源' + data.from_uid, data.content)
+    info('消息来源' + data.message, data.event)
   })
   /*
   const Wsm = new WsMessage()

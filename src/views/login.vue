@@ -7,7 +7,6 @@ import { useRouter, useRoute } from 'vue-router'
 const router = useRouter()
 const route = useRoute()
 const captcha = ref(null)
-const aaa = ref(false)
 const loading = ref(false)
 
 const base_value = reactive({
@@ -33,7 +32,7 @@ const refreshCaptcha = () => {
   })
 }
 
-const base_config = () => {
+const base_config2 = () => {
   loginApi.getBaseConfig().then((res) => {
     if (res.code === 200) {
       Object.assign(base_value, res.data)
@@ -42,7 +41,6 @@ const base_config = () => {
 }
 
 refreshCaptcha()
-base_config()
 
 const userStore = useUserStore()
 
@@ -64,6 +62,24 @@ const handleSubmit = async ({ values, errors }) => {
   }
   loading.value = false
 }
+
+const base_config = async () => {
+  if (loading.value) {
+    return
+  }
+  loading.value = true
+  const result = await userStore.setBaseConfig()
+  const data = await userStore.getBaseConfig()
+  Object.assign(base_value, data)
+  if (!result) {
+    loading.value = false
+    return
+  }
+
+  loading.value = false
+}
+
+base_config()
 </script>
 <template>
   <div id="background" class="fixed"></div>

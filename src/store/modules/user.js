@@ -7,23 +7,21 @@ import { homePage } from '@/router/homePageRoutes'
 import { useAppStore, useTagStore } from '@/store'
 
 const useUserStore = defineStore('user', {
-
   state: () => ({
     codes: undefined,
     roles: undefined,
     routers: undefined,
     user: undefined,
-    menus: undefined,
+    menus: undefined
   }),
 
   getters: {
     getState() {
       return { ...this.$state }
-    },
+    }
   },
 
   actions: {
-
     setToken(token) {
       tool.local.set(import.meta.env.VITE_APP_TOKEN_PREFIX, token)
     },
@@ -41,20 +39,20 @@ const useUserStore = defineStore('user', {
     },
 
     resetUserInfo() {
-      this.$reset();
+      this.$reset()
     },
 
     setMenu(data) {
       const routers = flatAsyncRoutes(filterAsyncRouter(data))
-      routers.map( item => router.addRoute('layout', item) )
+      routers.map((item) => router.addRoute('layout', item))
     },
 
     requestUserInfo() {
       return new Promise((resolve, reject) => {
-        loginApi.getInfo().then(async response => {
-          if (! response || ! response.data) {
+        loginApi.getInfo().then(async (response) => {
+          if (!response || !response.data) {
             this.clearToken()
-            await router.push({name: 'login'})
+            await router.push({ name: 'login' })
             reject(false)
           } else {
             this.setInfo(response.data)
@@ -70,17 +68,41 @@ const useUserStore = defineStore('user', {
     },
 
     login(form) {
-      return loginApi.login(form).then(r => {
-        if (r.code === 200) {
-          this.setToken(r.data.token)
-          return true
-        } else {
+      return loginApi
+        .login(form)
+        .then((r) => {
+          if (r.code === 200) {
+            this.setToken(r.data.token)
+            return true
+          } else {
+            return false
+          }
+        })
+        .catch((e) => {
+          console.error(e)
           return false
-        }
-      }).catch(e => {
-        console.error(e)
-        return false
-      })
+        })
+    },
+
+    setBaseConfig() {
+      return loginApi
+        .getBaseConfig()
+        .then((r) => {
+          if (r.code === 200) {
+            tool.local.set('baseConfig', r.data)
+            return true
+          } else {
+            return false
+          }
+        })
+        .catch((e) => {
+          console.error(e)
+          return false
+        })
+    },
+
+    getBaseConfig() {
+      return tool.local.get('baseConfig')
     },
 
     async logout() {
@@ -94,7 +116,10 @@ const useUserStore = defineStore('user', {
 
     async setApp() {
       const appStore = useAppStore()
-      const setting = typeof this.user.backend_setting === 'string' ? JSON.parse(this.user.backend_setting) : this.user.backend_setting
+      const setting =
+        typeof this.user.backend_setting === 'string'
+          ? JSON.parse(this.user.backend_setting)
+          : this.user.backend_setting
       appStore.toggleMode(setting?.mode ?? appStore.mode)
       appStore.toggleMenu(setting?.menuCollapse ?? appStore.menuCollapse)
       appStore.toggleTag(setting?.tag ?? appStore.tag)
@@ -104,14 +129,13 @@ const useUserStore = defineStore('user', {
       appStore.changeColor(setting?.color ?? appStore.color)
     }
   }
-
 })
 
 //路由扁平化
-const flatAsyncRoutes = (routes, breadcrumb=[]) => {
+const flatAsyncRoutes = (routes, breadcrumb = []) => {
   let res = []
-  routes.forEach(route => {
-    const tmp = {...route}
+  routes.forEach((route) => {
+    const tmp = { ...route }
     if (tmp.children) {
       let childrenBreadcrumb = [...breadcrumb]
       childrenBreadcrumb.push(route)
@@ -120,7 +144,7 @@ const flatAsyncRoutes = (routes, breadcrumb=[]) => {
       delete tmpRoute.children
       res.push(tmpRoute)
       let childrenRoutes = flatAsyncRoutes(tmp.children, childrenBreadcrumb)
-      childrenRoutes.map(item => {
+      childrenRoutes.map((item) => {
         res.push(item)
       })
     } else {
@@ -139,9 +163,8 @@ const empty = import.meta.glob('../../layout/empty.vue')
 // 菜单转换路由
 const filterAsyncRouter = (routerMap) => {
   const accessedRouters = []
-  routerMap.forEach(item => {
+  routerMap.forEach((item) => {
     if (item.meta.type !== 'B') {
-
       if (item.meta.type === 'I') {
         item.meta.url = item.path
         item.path = `/maIframe/${item.name}`
@@ -164,8 +187,8 @@ const filterAsyncRouter = (routerMap) => {
 // 去除按钮菜单
 const removeButtonMenu = (routers) => {
   let handlerAfterRouters = []
-  routers.forEach(item => {
-    if (item.meta.type !== 'B' && ! item.meta.hidden) {
+  routers.forEach((item) => {
+    if (item.meta.type !== 'B' && !item.meta.hidden) {
       let route = item
       if (item.children && item.children.length > 0) {
         route.children = removeButtonMenu(item.children)
