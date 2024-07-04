@@ -12,10 +12,11 @@ class PushService {
   constructor() {
     let config = tool.local.get('baseConfig')
 
-    this.ws = new Pusher('2d4271d4d40e6f3571e8aa7ef79ebbcf', {
+    this.ws = new Pusher(config.ws_appkey, {
       cluster: 'mt1',
       wsHost: config.wsHost, // websocket地址
       wsPort: config.wsPort,
+      wssPort: config.wsPort,
       encrypted: false,
       disableStats: true,
       forceTLS: config.ws_forceTLS,
