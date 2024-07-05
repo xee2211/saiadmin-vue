@@ -104,6 +104,8 @@ const formArray = ref([])
 const optionsArray = ref([])
 const configGroupData = ref([])
 const deleteVisible = ref(false)
+const tabId = ref('')
+const tabNum = ref('0')
 
 const openDeleteModal = (data) => {
   if (!auth('/core/config/destroy')) {
@@ -121,29 +123,34 @@ const openDeleteModal = (data) => {
 
 const handleChange = (key) => {
   const params = key.split('-')
-  console.log(maFormRef.value)
+  tabNum.value = params[0]
+  tabId.value = params[1]
+
   maFormRef.value[params[0]].init()
   active.value = key
-  console.log(key)
 }
 
 const reloadPage = () => {
   getConfigGroupList()
-  active.value = '0-1'
 }
 
 const getConfigGroupList = async () => {
   isCreateNode.value = false
   let param = route.meta.param?.groups ?? {}
-
   const response = await config.getConfigGroupList({ groups: param })
   configGroupData.value = response.data
+  if (response.data.length > 0 && tabId.value === '') {
+    const firstId = response.data[0].id
+    tabId.value = firstId
+  }
+
   configGroupData.value.map(async (item) => {
     formArray.value[item.id] = {}
     optionsArray.value[item.id] = []
     await getConfigData(item.id)
   })
   isCreateNode.value = true
+  active.value = tabNum.value + '-' + tabId.value
 }
 
 const getConfigData = async (id) => {
