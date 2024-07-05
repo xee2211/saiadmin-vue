@@ -1,5 +1,10 @@
 <template>
-  <a-modal fullscreen v-model:visible="visible" :footer="false" @close="refresh">
+  <a-modal
+    fullscreen
+    v-model:visible="visible"
+    :footer="false"
+    @close="refresh"
+  >
     <template #title>管理配置</template>
     <div class="h-full">
       <ma-crud ref="crudRef" :options="crud" :columns="columns" />
@@ -12,7 +17,7 @@ import { reactive, ref } from 'vue'
 import config from '@/api/setting/config'
 import { inputComponent } from './js/configDefine.js'
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'success'])
 
 const visible = ref(false)
 const groupId = ref()
@@ -30,13 +35,27 @@ const crud = reactive({
   showIndex: false,
   operationColumn: true,
   operationColumnWidth: 160,
-  add: { show: true, api: config.save, auth: ['/core/config/save'] },
   edit: { show: true, api: config.update, auth: ['/core/config/update'] },
   delete: { show: true, api: config.delete, auth: ['/core/config/destroy'] },
-  beforeRequest: (params) => params.group_id = groupId.value,
+  beforeRequest: (params) => (params.group_id = groupId.value),
+  afterEdit: (record) => {
+    emit('success')
+    return true
+  },
+  afterDelete: (record) => {
+    emit('success')
+    return true
+  },
+
   beforeEdit: (record) => {
-    if (record.config_select_data && typeof record.config_select_data === 'string') {
-      record.config_select_data = record.config_select_data.replace(/\r|\n|\s/g, '')
+    if (
+      record.config_select_data &&
+      typeof record.config_select_data === 'string'
+    ) {
+      record.config_select_data = record.config_select_data.replace(
+        /\r|\n|\s/g,
+        ''
+      )
       record.config_select_data = record.config_select_data.replace(',]', ']')
     }
     return true
@@ -50,28 +69,31 @@ const columns = reactive([
     dataIndex: 'group_id',
     formType: 'select',
     hide: true,
-    dict: { url: '/core/configGroup/index', props: { label: 'name', value: 'id' } },
+    dict: {
+      url: '/core/configGroup/index',
+      props: { label: 'name', value: 'id' }
+    },
     commonRules: [{ required: true, message: '所属组必选' }],
-    width: 180,
+    width: 180
   },
   {
     title: '配置标题',
     dataIndex: 'name',
     search: true,
     commonRules: [{ required: true, message: '配置标题必填' }],
-    width: 220,
+    width: 220
   },
   {
     title: '配置标识',
     dataIndex: 'key',
     search: true,
     commonRules: [{ required: true, message: '配置标识必填' }],
-    width: 180,
+    width: 180
   },
   {
     title: '配置值',
     dataIndex: 'value',
-    width: 200,
+    width: 200
   },
   {
     title: '排序',
@@ -79,7 +101,7 @@ const columns = reactive([
     formType: 'input-number',
     width: 200,
     min: 0,
-    max: 999,
+    max: 999
   },
   {
     title: '输入组件',
@@ -89,15 +111,17 @@ const columns = reactive([
     dict: { data: inputComponent },
     onControl: (val, maFormObject) => {
       const service = maFormObject.getColumnService()
-      service.get('config_select_data').setAttr('display', ['select', 'radio', 'checkbox'].includes(val))
+      service
+        .get('config_select_data')
+        .setAttr('display', ['select', 'radio', 'checkbox'].includes(val))
     },
-    width: 180,
+    width: 180
   },
   {
     title: '配置说明',
     dataIndex: 'remark',
     formType: 'input',
-    width: 180,
+    width: 180
   },
   {
     title: '配置选择数据',
@@ -105,7 +129,8 @@ const columns = reactive([
     formType: 'code-editor',
     height: 200,
     hide: true,
-    extra: '用于配置下拉、单选、复选的数据，格式例子：[{"label":"数据一", "value":"shuju1"},...]'
+    extra:
+      '用于配置下拉、单选、复选的数据，格式例子：[{"label":"数据一", "value":"shuju1"},...]'
   }
 ])
 

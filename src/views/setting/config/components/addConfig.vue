@@ -15,6 +15,11 @@
 import { reactive, ref } from 'vue'
 import config from '@/api/setting/config'
 import { inputComponent } from './js/configDefine.js'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+let param = route.meta.param ?? {}
 
 const emit = defineEmits(['success'])
 const formRef = ref()
@@ -39,7 +44,11 @@ const columns = reactive([
     dataIndex: 'group_id',
     formType: 'select',
     labelWidth: '120px',
-    dict: { url: '/core/configGroup/index', props: { label: 'name', value: 'id' }},
+    dict: {
+      url: '/core/configGroup/index',
+      props: { label: 'name', value: 'id' },
+      params: param
+    },
     rules: [{ required: true, message: '所属组必选' }]
   },
   {
@@ -57,7 +66,7 @@ const columns = reactive([
   {
     title: '配置值',
     dataIndex: 'value',
-    labelWidth: '120px',
+    labelWidth: '120px'
   },
   {
     title: '排序',
@@ -65,7 +74,7 @@ const columns = reactive([
     formType: 'input-number',
     labelWidth: '120px',
     min: 0,
-    max: 999,
+    max: 999
   },
   {
     title: '输入组件',
@@ -76,7 +85,9 @@ const columns = reactive([
     dict: { data: inputComponent },
     onControl: (val, maFormObject) => {
       const service = maFormObject.getColumnService()
-      service.get('config_select_data').setAttr('display', ['select', 'radio', 'checkbox'].includes(val))
+      service
+        .get('config_select_data')
+        .setAttr('display', ['select', 'radio', 'checkbox'].includes(val))
     }
   },
   {
@@ -84,7 +95,7 @@ const columns = reactive([
     dataIndex: 'remark',
     placeholder: '在输入组件下方显示配置的解释说明信息',
     formType: 'input',
-    labelWidth: '120px',
+    labelWidth: '120px'
   },
   {
     title: '选择/默认数据',
@@ -92,10 +103,10 @@ const columns = reactive([
     formType: 'code-editor',
     labelWidth: '120px',
     height: 200,
-    extra: '用于配置下拉、单选、复选的数据，格式例子：[{"label":"数据一", "value":"shuju1"},...]',
+    extra:
+      '用于配置下拉、单选、复选的数据，格式例子：[{"label":"数据一", "value":"shuju1"},...]'
   }
 ])
-
 </script>
 
 <style scoped>

@@ -1,53 +1,72 @@
+<!--
+ - MineAdmin is committed to providing solutions for quickly building web applications
+ - Please view the LICENSE file that was distributed with this source code,
+ - For the full copyright and license information.
+ - Thank you very much for using MineAdmin.
+ -
+ - @Author X.Mo<root@imoi.cn>
+ - @Link   https://gitee.com/xmo/mineadmin-vue
+-->
 <template>
-  <div class="ma-content-block justify-between p-4">
-    <a-tabs
-      type="rounded"
-      v-model:active-key="active"
-      @delete="openDeleteModal"
-      @change="handleChange"
-      :updateable="true"
-      auto-switch
-      :editable="true"
-    >
-      <template #extra>
-        <a-space>
-          <a-tooltip content="添加组">
-            <a-button
-              shape="round"
-              @click="addGroupModal"
-              type="primary"
-              v-auth="['/core/config/save']"
-            >
-              <template #icon><icon-plus /></template>
-            </a-button>
-          </a-tooltip>
-
-          <a-tooltip content="管理该组配置">
-            <a-button
-              shape="round"
-              @click="manageConfigModal"
-              type="primary"
-              v-auth="['/core/config/index']"
-            >
-              <template #icon><icon-settings /></template>
-            </a-button>
-          </a-tooltip>
-        </a-space>
-      </template>
-      <a-tab-pane
-        v-for="(item, index) in configGroupData"
-        :key="`${index}-${item.id}`"
-        :title="item.name"
+  <div class="lg:flex justify-between">
+    <div class="ma-content-block p-5 h-full lg:w-1/2">
+      <a-tabs
+        type="rounded"
+        v-model:active-key="active"
+        @delete="openDeleteModal"
+        @change="handleChange"
+        :updateable="true"
+        auto-switch
+        :editable="true"
       >
-        <ma-form
-          v-model="formArray[item.id]"
-          :columns="optionsArray[item.id]"
-          @submit="submit"
-          class="mt-3"
-          ref="maFormRef"
-        />
-      </a-tab-pane>
-    </a-tabs>
+        <template #extra>
+          <a-space>
+            <a-tooltip content="添加组">
+              <a-button
+                shape="round"
+                @click="addGroupModal"
+                type="primary"
+                v-auth="['setting:config:save']"
+              >
+                <template #icon><icon-plus /></template>
+              </a-button>
+            </a-tooltip>
+
+            <a-tooltip content="管理该组配置">
+              <a-button
+                shape="round"
+                @click="manageConfigModal"
+                type="primary"
+                v-auth="['setting:config:index']"
+              >
+                <template #icon><icon-settings /></template>
+              </a-button>
+            </a-tooltip>
+          </a-space>
+        </template>
+        <a-tab-pane
+          v-for="(item, index) in configGroupData"
+          :key="`${index}-${item.id}`"
+          :title="item.name"
+        >
+          <ma-form
+            v-if="isCreateNode"
+            v-model="formArray[item.id]"
+            :columns="optionsArray[item.id]"
+            @submit="submit"
+            class="mt-3"
+            ref="maFormRef"
+          />
+        </a-tab-pane>
+      </a-tabs>
+    </div>
+
+    <div
+      class="ma-content-block p-5 h-full lg:w-1/2 lg:ml-3 mt-3 lg:mt-0"
+      v-if="$common.auth(['setting:config:save'])"
+    >
+      <add-config @success="addConfigSuccess" />
+    </div>
 
     <a-modal
       v-model:visible="deleteVisible"
@@ -77,7 +96,7 @@
 
     <add-group ref="addGroupRef" @success="addGroupSuccess" />
 
-    <manage-config ref="manageConfigRef" @close="reloadPage" />
+    <manage-config ref="manageConfigRef" @success="reloadPage" />
   </div>
 </template>
 
@@ -89,12 +108,12 @@ import { auth } from '@/utils/common'
 import AddGroup from './components/addGroup.vue'
 import AddConfig from './components/addConfig.vue'
 import ManageConfig from './components/manageConfig.vue'
-import { useRoute } from 'vue-router'
 
+import { useRoute } from 'vue-router'
 const route = useRoute()
 
 const isCreateNode = ref(false)
-const active = ref('0-1')
+const active = ref('')
 const name = ref('')
 const deleteGroupData = ref({ name: '' })
 const maFormRef = ref()
@@ -104,14 +123,8 @@ const formArray = ref([])
 const optionsArray = ref([])
 const configGroupData = ref([])
 const deleteVisible = ref(false)
-const tabId = ref('')
-const tabNum = ref('0')
 
 const openDeleteModal = (data) => {
-  if (!auth('/core/config/destroy')) {
-    Message.info('没有权限删除配置')
-    return
-  }
   const id = data.split('-')[1]
   if (id == 1 || id == 2) {
     Message.info('该配置为系统核心配置，无法删除')
@@ -123,15 +136,8 @@ const openDeleteModal = (data) => {
 
 const handleChange = (key) => {
   const params = key.split('-')
-  tabNum.value = params[0]
-  tabId.value = params[1]
-
   maFormRef.value[params[0]].init()
   active.value = key
-}
-
-const reloadPage = () => {
-  getConfigGroupList()
 }
 
 const getConfigGroupList = async () => {
@@ -139,18 +145,20 @@ const getConfigGroupList = async () => {
   let param = route.meta.param?.groups ?? {}
   const response = await config.getConfigGroupList({ groups: param })
   configGroupData.value = response.data
-  if (response.data.length > 0 && tabId.value === '') {
+
+  if (response.data.length > 0 && active.value === '') {
     const firstId = response.data[0].id
-    tabId.value = firstId
+    active.value = '0-' + firstId
   }
 
-  configGroupData.value.map(async (item) => {
-    formArray.value[item.id] = {}
-    optionsArray.value[item.id] = []
-    await getConfigData(item.id)
-  })
+  await Promise.all(
+    configGroupData.value.map(async (item) => {
+      formArray.value[item.id] = {}
+      optionsArray.value[item.id] = []
+      await getConfigData(item.id)
+    })
+  )
   isCreateNode.value = true
-  active.value = tabNum.value + '-' + tabId.value
 }
 
 const getConfigData = async (id) => {
@@ -171,119 +179,11 @@ const getConfigData = async (id) => {
       extra: item.remark,
       tooltip: item.key
     }
-    if (item.key === 'upload_mode') {
-      option = {
-        title: item.name,
-        dataIndex: item.key,
-        formType: item.input_type,
-        dict: {},
-        labelWidth: '120px',
-        extra: item.remark,
-        tooltip: item.key,
-        onControl: (val) => {
-          if (val == 1) {
-            return {
-              local_root: { display: true },
-              local_domain: { display: true },
-              local_uri: { display: true },
-              oss_accessKeyId: { display: false },
-              oss_accessKeySecret: { display: false },
-              oss_bucket: { display: false },
-              oss_dirname: { display: false },
-              oss_domain: { display: false },
-              oss_endpoint: { display: false },
-              qiniu_accessKey: { display: false },
-              qiniu_secretKey: { display: false },
-              qiniu_bucket: { display: false },
-              qiniu_dirname: { display: false },
-              qiniu_domain: { display: false },
-              cos_secretId: { display: false },
-              cos_secretKey: { display: false },
-              cos_bucket: { display: false },
-              cos_dirname: { display: false },
-              cos_domain: { display: false },
-              cos_region: { display: false }
-            }
-          }
-          if (val == 2) {
-            return {
-              local_root: { display: false },
-              local_domain: { display: false },
-              local_uri: { display: false },
-              oss_accessKeyId: { display: true },
-              oss_accessKeySecret: { display: true },
-              oss_bucket: { display: true },
-              oss_dirname: { display: true },
-              oss_domain: { display: true },
-              oss_endpoint: { display: true },
-              qiniu_accessKey: { display: false },
-              qiniu_secretKey: { display: false },
-              qiniu_bucket: { display: false },
-              qiniu_dirname: { display: false },
-              qiniu_domain: { display: false },
-              cos_secretId: { display: false },
-              cos_secretKey: { display: false },
-              cos_bucket: { display: false },
-              cos_dirname: { display: false },
-              cos_domain: { display: false },
-              cos_region: { display: false }
-            }
-          }
-          if (val == 3) {
-            return {
-              local_root: { display: false },
-              local_domain: { display: false },
-              local_uri: { display: false },
-              oss_accessKeyId: { display: false },
-              oss_accessKeySecret: { display: false },
-              oss_bucket: { display: false },
-              oss_dirname: { display: false },
-              oss_domain: { display: false },
-              oss_endpoint: { display: false },
-              qiniu_accessKey: { display: true },
-              qiniu_secretKey: { display: true },
-              qiniu_bucket: { display: true },
-              qiniu_dirname: { display: true },
-              qiniu_domain: { display: true },
-              cos_secretId: { display: false },
-              cos_secretKey: { display: false },
-              cos_bucket: { display: false },
-              cos_dirname: { display: false },
-              cos_domain: { display: false },
-              cos_region: { display: false }
-            }
-          }
-          if (val == 4) {
-            return {
-              local_root: { display: false },
-              local_domain: { display: false },
-              local_uri: { display: false },
-              oss_accessKeyId: { display: false },
-              oss_accessKeySecret: { display: false },
-              oss_bucket: { display: false },
-              oss_dirname: { display: false },
-              oss_domain: { display: false },
-              oss_endpoint: { display: false },
-              qiniu_accessKey: { display: false },
-              qiniu_secretKey: { display: false },
-              qiniu_bucket: { display: false },
-              qiniu_dirname: { display: false },
-              qiniu_domain: { display: false },
-              cos_secretId: { display: true },
-              cos_secretKey: { display: true },
-              cos_bucket: { display: true },
-              cos_dirname: { display: true },
-              cos_domain: { display: true },
-              cos_region: { display: true }
-            }
-          }
-        }
-      }
-    }
     const allowDictType = ['select', 'radio', 'checkbox']
     if (allowDictType.includes(item.input_type)) {
       option.dict = { data: item.config_select_data }
     }
+
     if (item.input_type === 'switch') {
       switch (typeof item.value) {
         case 'string':
@@ -322,6 +222,10 @@ const manageConfigModal = () => {
   manageConfigRef.value.open(active.value.split('-')[1])
 }
 
+const reloadPage = () => {
+  getConfigGroupList()
+}
+
 const addGroupModal = () => addGroupRef.value.open()
 const addGroupSuccess = (result) => {
   if (result) {
@@ -330,6 +234,15 @@ const addGroupSuccess = (result) => {
     return
   }
   Message.success('配置组保存失败')
+}
+
+const addConfigSuccess = (result) => {
+  if (result) {
+    Message.success('配置添加成功')
+    getConfigGroupList()
+    return
+  }
+  Message.success('配置添加失败')
 }
 
 const deleteConfigGroup = async (done) => {
@@ -351,13 +264,15 @@ const deleteConfigGroup = async (done) => {
 }
 
 const submit = async (data) => {
-  if (!auth('/core/config/update')) {
+  if (!auth('setting:config:update')) {
     Message.info('没有权限修改配置')
     return
   }
   const response = await config.updateByKeys(data)
   if (response.code === 200) {
+    console.log('@2')
     Message.success(response.message)
+    getConfigGroupList()
   }
 }
 
