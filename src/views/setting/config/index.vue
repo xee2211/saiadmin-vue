@@ -126,7 +126,7 @@ const deleteVisible = ref(false)
 
 const openDeleteModal = (data) => {
   const id = data.split('-')[1]
-  if (id == 1 || id == 2) {
+  if (id < 30) {
     Message.info('该配置为系统核心配置，无法删除')
     return
   }
