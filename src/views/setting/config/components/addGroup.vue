@@ -2,15 +2,25 @@
   <a-modal v-model:visible="visible" :footer="false" draggable width="600px">
     <template #title>添加配置组</template>
 
-    <ma-form v-model="form" v-model:columns="columns" @submit="submit" ref="maformRef"></ma-form>
+    <ma-form
+      v-model="form"
+      v-model:columns="columns"
+      @submit="submit"
+      ref="maformRef"
+    ></ma-form>
   </a-modal>
 </template>
 
 <script setup>
 import { reactive, ref } from 'vue'
 import config from '@/api/setting/config'
+import { useRoute } from 'vue-router'
 
-const form = ref({})
+const route = useRoute()
+
+let param = route.meta.param ?? {}
+
+const form = ref(param)
 const maformRef = ref()
 const visible = ref(false)
 const emit = defineEmits(['success'])
